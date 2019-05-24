@@ -22,7 +22,7 @@ public class AlgorithmSolver {
         return groups.get(0);
     }
 
-    private static Group getMaximumGroupFromRelationsList(Relation startingGroup, List<Relation> relationsList) {
+    static Group getMaximumGroupFromRelationsList(Relation startingGroup, List<Relation> relationsList) {
         Group group = new Group();
         group.add(startingGroup.getName1());
         group.add(startingGroup.getName2());
@@ -56,7 +56,7 @@ public class AlgorithmSolver {
         return group;
     }
 
-    private static List<Group> getLargestGroupsList(List<Relation> relationsList) {
+    static List<Group> getLargestGroupsList(List<Relation> relationsList) {
         List<Group> largestGroupsList = new ArrayList<>();
         outer:
         for(int i = 0; i < relationsList.size(); i++) {
@@ -79,7 +79,7 @@ public class AlgorithmSolver {
         return largestGroupsList;
     }
 
-    private static List<Group> getGroupsWithMostAcquaintances(List<Group> groups) {
+    static List<Group> getGroupsWithMostAcquaintances(List<Group> groups) {
         List<Group> groupsWithMostAcquaintances = new ArrayList<>();
         for (Group group : groups) {
             if (groupsWithMostAcquaintances.isEmpty()) {

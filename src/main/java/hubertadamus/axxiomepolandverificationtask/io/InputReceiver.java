@@ -12,7 +12,7 @@ public final class InputReceiver {
         } else {
             return new String[] {};
         }
-        consoleScanner.nextLine();
+        //consoleScanner.nextLine();
         String[] relations = new String[relationsNumber];
         for(int i = 0; i < relationsNumber; i++) {
             relations[i] = consoleScanner.nextLine();
