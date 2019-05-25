@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class AlgorithmSolverTest {
 
@@ -71,42 +71,18 @@ class AlgorithmSolverTest {
         relationsList.add(new Relation("3", "6"));
         relationsList.add(new Relation("3", "7"));
         relationsList.add(new Relation("6", "7"));
-        Group group1 = new Group();
-        group1.add("1");
-        group1.add("2");
-        group1.add("4");
-        group1.add("5");
-        Group group2 = new Group();
-        group2.add("2");
-        group2.add("3");
-        group2.add("6");
-        group2.add("7");
+        Group group1 = new Group.GroupBuilder("1", "2", "4", "5")
+                .addAcquaintance()
+                .addAcquaintance()
+                .addAcquaintance()
+                .build();
+        Group group2 = new Group.GroupBuilder("2", "3", "6", "7")
+                .addAcquaintance()
+                .addAcquaintance()
+                .addAcquaintance()
+                .build();
         List<Group> result = AlgorithmSolver.getLargestGroupsList(relationsList);
         assertEquals(group1, result.get(0));
         assertEquals(group2, result.get(1));
-    }
-
-    @Test
-    void getGroupsWithMostAcquaintances() {
-        List<Group> groupsList = new ArrayList<>();
-        Group group1 = new Group();
-        group1.add("1");
-        group1.add("2");
-        group1.add("4");
-        group1.add("5");
-        group1.addAcquaintance();
-        group1.addAcquaintance();
-        group1.addAcquaintance();
-        groupsList.add(group1);
-        Group group2 = new Group();
-        group2.add("2");
-        group2.add("3");
-        group2.add("6");
-        group2.add("7");
-        group2.addAcquaintance();
-        group2.addAcquaintance();
-        groupsList.add(group2);
-        List<Group> result = AlgorithmSolver.getGroupsWithMostAcquaintances(groupsList);
-        assertEquals(group1, result.get(0));
     }
 }

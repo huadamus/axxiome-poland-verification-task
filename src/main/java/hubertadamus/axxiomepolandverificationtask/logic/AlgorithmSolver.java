@@ -14,46 +14,42 @@ public class AlgorithmSolver {
         if(groups.size() == 1) {
             return groups.get(0);
         }
-        groups = getGroupsWithMostAcquaintances(groups);
-        if(groups.size() == 1) {
-            return groups.get(0);
-        }
         Collections.sort(groups);
         return groups.get(0);
     }
 
     static Group getMaximumGroupFromRelationsList(Relation startingGroup, List<Relation> relationsList) {
-        Group group = new Group();
-        group.add(startingGroup.getName1());
-        group.add(startingGroup.getName2());
+        Group.GroupBuilder groupBuilder = new Group.GroupBuilder(startingGroup.getName1(), startingGroup.getName2());
         for(int i = 0; i < relationsList.size(); i++) {
             if(startingGroup.equals(relationsList.get(i))) {
                 continue;
             }
-            if(group.containsOne(relationsList.get(i))) {
-                String stranger = group.getStranger(relationsList.get(i));
-                Group checkGroup = new Group();
+            Group unfinishedGroup = groupBuilder.build();
+            if (unfinishedGroup.containsOne(relationsList.get(i))) {
+                String stranger = unfinishedGroup.getStranger(relationsList.get(i));
+                Group.GroupBuilder checkGroupBuilder = new Group.GroupBuilder();
                 for (Relation relation : relationsList) {
-                    if (group.contains(relation.getOther(stranger)) && relation.hasName(stranger)) {
-                        checkGroup.add(relation.getOther(stranger));
+                    if (unfinishedGroup.contains(relation.getOther(stranger)) && relation.hasName(stranger)) {
+                        checkGroupBuilder.addName(relation.getOther(stranger));
                     }
                 }
-                if(group.equals(checkGroup)) {
-                    group.add(stranger);
+                if (unfinishedGroup.equals(checkGroupBuilder.build())) {
+                    groupBuilder.addName(stranger);
                 }
             }
         }
         List<String> knownAcquaintances = new ArrayList<>();
         for (Relation relation : relationsList) {
-            if (group.containsOne(relation)) {
-                String stranger = group.getStranger(relation);
+            Group unfinishedGroup = groupBuilder.build();
+            if (unfinishedGroup.containsOne(relation)) {
+                String stranger = unfinishedGroup.getStranger(relation);
                 if (!knownAcquaintances.contains(stranger)) {
-                    group.addAcquaintance();
+                    groupBuilder.addAcquaintance();
                     knownAcquaintances.add(stranger);
                 }
             }
         }
-        return group;
+        return groupBuilder.build();
     }
 
     static List<Group> getLargestGroupsList(List<Relation> relationsList) {
@@ -77,20 +73,5 @@ public class AlgorithmSolver {
             }
         }
         return largestGroupsList;
-    }
-
-    static List<Group> getGroupsWithMostAcquaintances(List<Group> groups) {
-        List<Group> groupsWithMostAcquaintances = new ArrayList<>();
-        for (Group group : groups) {
-            if (groupsWithMostAcquaintances.isEmpty()) {
-                groupsWithMostAcquaintances.add(group);
-            } else if (group.getAcquaintances() == groupsWithMostAcquaintances.get(0).getAcquaintances()) {
-                groupsWithMostAcquaintances.add(group);
-            } else if (group.getAcquaintances() > groupsWithMostAcquaintances.get(0).getAcquaintances()) {
-                groupsWithMostAcquaintances.clear();
-                groupsWithMostAcquaintances.add(group);
-            }
-        }
-        return groupsWithMostAcquaintances;
     }
 }

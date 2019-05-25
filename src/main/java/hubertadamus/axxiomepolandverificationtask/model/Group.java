@@ -1,28 +1,24 @@
 package hubertadamus.axxiomepolandverificationtask.model;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 public class Group implements Comparable<Group> {
     private final List<String> names;
-    private int acquaintances;
+    private final int acquaintances;
 
-    public Group() {
-        names = new ArrayList<>();
-        acquaintances = 0;
+    private Group(List<String> names, int acquaintances) {
+        this.names = names;
+        this.acquaintances = acquaintances;
     }
 
-    public void add(String name) {
-        names.add(name);
-        Collections.sort(names);
-    }
-
-    public final String getName(int i) {
+    public String getName(int i) {
         return names.get(i);
     }
 
-    public final int getSize() {
+    public int getSize() {
         return names.size();
     }
 
@@ -33,10 +29,6 @@ public class Group implements Comparable<Group> {
     public boolean containsOne(Relation relation) {
         return (names.contains(relation.getName1()) && !names.contains(relation.getName2()))
                 || (names.contains(relation.getName2()) && !names.contains(relation.getName1()));
-    }
-
-    public void addAcquaintance() {
-        acquaintances++;
     }
 
     public int getAcquaintances() {
@@ -56,16 +48,18 @@ public class Group implements Comparable<Group> {
 
     @Override
     public int compareTo(Group otherGroup) {
-        if(names.size() > otherGroup.names.size()) {
-            return 1;
-        } else if(names.size() < otherGroup.names.size()) {
-            return -1;
+        if (names.size() != otherGroup.names.size()) {
+            return Integer.compare(names.size(), otherGroup.names.size());
         } else {
-            for(int i = 0; i < names.size(); i++) {
-                if(names.get(i).equals(otherGroup.names.get(i))) {
-                    continue;
+            if (acquaintances != otherGroup.acquaintances) {
+                return Integer.compare(acquaintances, otherGroup.acquaintances);
+            } else {
+                for (int i = 0; i < names.size(); i++) {
+                    if (names.get(i).equals(otherGroup.names.get(i))) {
+                        continue;
+                    }
+                    return names.get(i).compareTo(otherGroup.names.get(i));
                 }
-                return names.get(i).compareTo(otherGroup.names.get(i));
             }
         }
         return 0;
@@ -78,5 +72,32 @@ public class Group implements Comparable<Group> {
         }
         Group otherGroup = (Group)o;
         return names.equals(otherGroup.names);
+    }
+
+    public static class GroupBuilder {
+        private final List<String> names;
+        private int acquaintances;
+
+        public GroupBuilder(String... names) {
+            this.names = new ArrayList<>();
+            this.names.addAll(Arrays.asList(names));
+            Collections.sort(this.names);
+            acquaintances = 0;
+        }
+
+        public GroupBuilder addName(String name) {
+            names.add(name);
+            Collections.sort(names);
+            return this;
+        }
+
+        public GroupBuilder addAcquaintance() {
+            acquaintances++;
+            return this;
+        }
+
+        public Group build() {
+            return new Group(names, acquaintances);
+        }
     }
 }
