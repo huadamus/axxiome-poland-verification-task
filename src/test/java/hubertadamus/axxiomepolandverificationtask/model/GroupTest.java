@@ -82,7 +82,7 @@ class GroupTest {
         Group group1 = new Group.GroupBuilder(name1, name2, name3, name4).build();
         Group group2 = new Group.GroupBuilder(name1, name2, name3, name5).build();
         Group group3 = new Group.GroupBuilder(name1, name2, name3).build();
-        assertTrue(group1.compareTo(group2) < 0);
+        assertTrue(group1.compareTo(group2) > 0);
         assertTrue(group1.compareTo(group3) > 0);
         assertTrue(group2.compareTo(group3) > 0);
     }

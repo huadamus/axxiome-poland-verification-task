@@ -4,74 +4,68 @@ import hubertadamus.axxiomepolandverificationtask.model.Group;
 import hubertadamus.axxiomepolandverificationtask.model.Relation;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 public class AlgorithmSolver {
 
     public static Group solve(List<Relation> relationsList) {
-        List<Group> groups = getLargestGroupsList(relationsList);
-        if(groups.size() == 1) {
-            return groups.get(0);
-        }
-        Collections.sort(groups);
-        return groups.get(0);
+        Stream<Relation> relationsStream = relationsList.stream();
+        Optional<Group> result = relationsStream
+                .map(relation -> getGroupFromRelationsList(relation, relationsList))
+                .max(new GroupComparator());
+        return result.orElse(new Group.GroupBuilder().build());
     }
 
-    static Group getMaximumGroupFromRelationsList(Relation startingGroup, List<Relation> relationsList) {
-        Group.GroupBuilder groupBuilder = new Group.GroupBuilder(startingGroup.getName1(), startingGroup.getName2());
-        for(int i = 0; i < relationsList.size(); i++) {
-            if(startingGroup.equals(relationsList.get(i))) {
-                continue;
-            }
-            Group unfinishedGroup = groupBuilder.build();
-            if (unfinishedGroup.containsOne(relationsList.get(i))) {
-                String stranger = unfinishedGroup.getStranger(relationsList.get(i));
-                Group.GroupBuilder checkGroupBuilder = new Group.GroupBuilder();
-                for (Relation relation : relationsList) {
-                    if (unfinishedGroup.contains(relation.getOther(stranger)) && relation.hasName(stranger)) {
-                        checkGroupBuilder.addName(relation.getOther(stranger));
-                    }
-                }
-                if (unfinishedGroup.equals(checkGroupBuilder.build())) {
-                    groupBuilder.addName(stranger);
-                }
-            }
-        }
-        List<String> knownAcquaintances = new ArrayList<>();
-        for (Relation relation : relationsList) {
-            Group unfinishedGroup = groupBuilder.build();
-            if (unfinishedGroup.containsOne(relation)) {
-                String stranger = unfinishedGroup.getStranger(relation);
-                if (!knownAcquaintances.contains(stranger)) {
-                    groupBuilder.addAcquaintance();
-                    knownAcquaintances.add(stranger);
-                }
-            }
-        }
+    private static Group getGroupFromRelationsList(Relation startingGroup, List<Relation> relationsList) {
+        Group.GroupBuilder groupBuilder = matchGroup(startingGroup, relationsList);
+        assignAcquaintances(groupBuilder, relationsList);
         return groupBuilder.build();
     }
 
-    static List<Group> getLargestGroupsList(List<Relation> relationsList) {
-        List<Group> largestGroupsList = new ArrayList<>();
-        outer:
-        for(int i = 0; i < relationsList.size(); i++) {
-            Group group = getMaximumGroupFromRelationsList(relationsList.get(i), relationsList);
-            if(largestGroupsList.isEmpty()) {
-                largestGroupsList.add(group);
-            } else if(group.getSize() == largestGroupsList.get(0).getSize()) {
-                //this loop below makes sure the groups in the output list are not occurring several times.
-                for (Group sameGroup : largestGroupsList) {
-                    if (sameGroup.equals(group)) {
-                        continue outer;
+    private static Group.GroupBuilder matchGroup(Relation startingGroup, List<Relation> relationsList) {
+        Group.GroupBuilder groupBuilder = new Group.GroupBuilder(startingGroup.getName1(), startingGroup.getName2());
+        relationsList.stream()
+                .distinct()
+                .forEach(relation -> {
+                    Group unfinishedGroup = groupBuilder.build();
+                    if (unfinishedGroup.containsOne(relation)) {
+                        String stranger = unfinishedGroup.getStranger(relation);
+                        if (unfinishedGroup.equals(createCheckGroup(stranger, unfinishedGroup, relationsList))) {
+                            groupBuilder.addName(stranger);
+                        }
                     }
-                }
-                largestGroupsList.add(group);
-            } else if(group.getSize() > largestGroupsList.get(0).getSize()) {
-                largestGroupsList.clear();
-                largestGroupsList.add(group);
-            }
+                });
+        return groupBuilder;
+    }
+
+    private static Group createCheckGroup(String name, Group testedAgainstGroup, List<Relation> relationsList) {
+        Group.GroupBuilder checkGroupBuilder = new Group.GroupBuilder();
+        relationsList.stream()
+                .filter(relation -> testedAgainstGroup.contains(relation.getOther(name)) && relation.hasName(name))
+                .forEach(relation -> checkGroupBuilder.addName(relation.getOther(name)));
+        return checkGroupBuilder.build();
+    }
+
+    private static void assignAcquaintances(Group.GroupBuilder groupBuilder, List<Relation> relationsList) {
+        List<String> knownAcquaintances = new ArrayList<>();
+        relationsList.stream()
+                .filter(relation -> groupBuilder.build().containsOne(relation))
+                .forEach(relation -> {
+                    String stranger = groupBuilder.build().getStranger(relation);
+                    if (!knownAcquaintances.contains(stranger)) {
+                        groupBuilder.addAcquaintance();
+                        knownAcquaintances.add(stranger);
+                    }
+                });
+    }
+
+    static class GroupComparator implements Comparator<Group> {
+        @Override
+        public int compare(Group group1, Group group2) {
+            return group1.compareTo(group2);
         }
-        return largestGroupsList;
     }
 }

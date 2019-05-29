@@ -58,7 +58,7 @@ public class Group implements Comparable<Group> {
                     if (names.get(i).equals(otherGroup.names.get(i))) {
                         continue;
                     }
-                    return names.get(i).compareTo(otherGroup.names.get(i));
+                    return otherGroup.names.get(i).compareTo(names.get(i));
                 }
             }
         }
